@@ -175,7 +175,14 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             set -eu
-            sudo systemctl restart income-api
+            show_diagnostics() {
+              sudo systemctl status income-api --no-pager --full || true
+              sudo journalctl -u income-api -n 80 --no-pager || true
+            }
+            if ! sudo systemctl restart income-api; then
+              show_diagnostics
+              exit 1
+            fi
             for attempt in $(seq 1 12); do
               if curl --fail --silent --show-error --max-time 5 http://localhost:8080/healthz; then
                 echo "Health check passed."
@@ -185,4 +192,5 @@ jobs:
               sleep 5
             done
             echo "Health check failed after 12 attempts."
+            show_diagnostics
             exit 1
