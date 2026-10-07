@@ -1,0 +1,5 @@
+[core]
+    remote = labstore
+['remote "labstore"']
+    url = gs://ai-lab21-gcp-bucket/dvc
+    credentialpath = ../sa-key.json
