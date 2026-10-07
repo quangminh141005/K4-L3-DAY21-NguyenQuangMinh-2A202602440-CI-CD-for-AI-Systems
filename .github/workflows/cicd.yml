@@ -62,13 +62,31 @@ jobs:
           import os
           from pathlib import Path
 
-          credentials = json.loads(os.environ["STORAGE_CREDENTIALS"])
+          raw_credentials = os.environ.get("STORAGE_CREDENTIALS", "")
+          if not raw_credentials.strip():
+              raise SystemExit("STORAGE_CREDENTIALS secret is missing or empty.")
+          try:
+              credentials = json.loads(raw_credentials)
+          except json.JSONDecodeError:
+              raise SystemExit("STORAGE_CREDENTIALS must contain the complete service-account JSON key.") from None
+          if not isinstance(credentials, dict) or credentials.get("type") != "service_account":
+              raise SystemExit("STORAGE_CREDENTIALS must be a service-account JSON key.")
+          from google.oauth2 import service_account
+          try:
+              service_account.Credentials.from_service_account_info(credentials)
+          except (ValueError, KeyError):
+              raise SystemExit("STORAGE_CREDENTIALS has missing fields or an invalid private key.") from None
           path = Path(os.environ["RUNNER_TEMP"]) / "sa-key.json"
           path.touch(mode=0o600)
           path.write_text(json.dumps(credentials))
           with open(os.environ["GITHUB_ENV"], "a") as f:
               f.write(f"GOOGLE_APPLICATION_CREDENTIALS={path}\n")
           PYEOF
+
+      - name: Configure DVC credentials for this runner
+        run: |
+          DVC_REMOTE=$(dvc config core.remote)
+          dvc remote modify --local "$DVC_REMOTE" credentialpath "$GOOGLE_APPLICATION_CREDENTIALS"
 
       - name: Pull data with DVC
         run: dvc pull data/train_batch1.csv.dvc data/holdout.csv.dvc
