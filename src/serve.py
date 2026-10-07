@@ -18,20 +18,13 @@ def download_model():
     Ham nay duoc goi mot lan khi module duoc import. Su dung
     GOOGLE_APPLICATION_CREDENTIALS de xac thuc (duoc dat trong systemd service).
     """
-    # TODO 1: Tao storage.Client()
-    # client = storage.Client()
+    client = storage.Client()
+    bucket = client.bucket(ARTIFACT_BUCKET)
+    blob = bucket.blob(MODEL_KEY)
 
-    # TODO 2: Lay bucket va blob tuong ung
-    # bucket = client.bucket(ARTIFACT_BUCKET)
-    # blob   = bucket.blob(MODEL_KEY)
-
-    # TODO 3: Tai file model xuong may
-    # blob.download_to_filename(MODEL_PATH)
-
-    # TODO 4: In thong bao thanh cong
-    # print("Model da duoc tai xuong tu cloud storage.")
-
-    pass  # xoa dong nay sau khi hoan thanh tat ca TODO ben tren
+    os.makedirs(os.path.dirname(MODEL_PATH), exist_ok=True)
+    blob.download_to_filename(MODEL_PATH)
+    print("Model da duoc tai xuong tu cloud storage.")
 
 
 download_model()
@@ -50,8 +43,7 @@ def healthz():
 
     Tra ve: {"status": "ok"}
     """
-    # TODO 5: Tra ve dict {"status": "ok"}
-    pass  # xoa dong nay sau khi hoan thanh
+    return {"status": "ok"}
 
 
 @app.post("/score")
@@ -66,17 +58,17 @@ def score(req: ScoreRequest):
         age, workclass, education_num, marital_status, occupation,
         relationship, sex, capital_gain, capital_loss, hours_per_week
     """
-    # TODO 6: Kiem tra so luong dac trung.
-    # Neu len(req.features) != 10, raise HTTPException(status_code=400, ...)
+    if len(req.features) != 10:
+        raise HTTPException(
+            status_code=400,
+            detail="Expected exactly 10 features.",
+        )
 
-    # TODO 7: Goi model.predict([req.features]) de lay ket qua du doan.
-    # pred = model.predict(...)
-
-    # TODO 8: Tra ve dict chua "prediction" (int) va "label" (string).
-    # Nhan tuong ung: 0 -> "thu_nhap_thap", 1 -> "thu_nhap_cao"
-    # return {"prediction": ..., "label": ...}
-
-    pass  # xoa dong nay sau khi hoan thanh tat ca TODO ben tren
+    pred = int(model.predict([req.features])[0])
+    return {
+        "prediction": pred,
+        "label": "thu_nhap_cao" if pred == 1 else "thu_nhap_thap",
+    }
 
 
 if __name__ == "__main__":

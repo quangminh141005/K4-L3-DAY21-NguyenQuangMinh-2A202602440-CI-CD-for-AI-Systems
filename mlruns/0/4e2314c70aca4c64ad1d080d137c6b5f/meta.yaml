@@ -1,0 +1,15 @@
+artifact_uri: file:///home/qminh/Documents/qm/Vin_AI/Day21-track2-CICD_for_AI_Systems/K4-L3-DAY21-NguyenQuangMinh-2A202602440-CI-CD-for-AI-Systems/mlruns/0/4e2314c70aca4c64ad1d080d137c6b5f/artifacts
+end_time: 1791380349667
+entry_point_name: ''
+experiment_id: '0'
+lifecycle_stage: active
+run_id: 4e2314c70aca4c64ad1d080d137c6b5f
+run_name: amazing-vole-34
+run_uuid: 4e2314c70aca4c64ad1d080d137c6b5f
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1791380346570
+status: 3
+tags: []
+user_id: qminh
